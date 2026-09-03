@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Furfeed — where pets go social</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --cream:#FBF4EA;
+  --cream-2:#F3E9DB;
+  --coral:#FF7A5C;
+  --coral-dark:#E85F41;
+  --sage:#7FAE86;
+  --sage-dark:#5F8F67;
+  --sky:#6FA8C7;
+  --charcoal:#2B2620;
+  --charcoal-soft:#5B534A;
+  --white:#FFFFFF;
+  --line:#EBE0CF;
+  --shadow: 0 6px 20px rgba(43,38,32,0.08);
+  --shadow-lg: 0 16px 40px rgba(43,38,32,0.14);
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --nav-w: 236px;
+  --font-head: 'Baloo 2', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+[data-theme="dark"]{
+  --cream:#211D18;
+  --cream-2:#2A251F;
+  --charcoal:#F4EEE3;
+  --charcoal-soft:#C9C0B2;
+  --white:#2C2721;
+  --line:#3B342B;
+  --shadow: 0 6px 20px rgba(0,0,0,0.35);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:var(--cream);
+  color:var(--charcoal);
+  transition:background .25s ease, color .25s ease;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--font-head); margin:0; letter-spacing:.2px;}
+a{text-decoration:none; color:inherit;}
+button{font-family:var(--font-body); cursor:pointer;}
+img{max-width:100%; display:block;}
+::selection{background:var(--coral); color:#fff;}
+:focus-visible{outline:3px solid var(--sky); outline-offset:2px;}
+
+/* ============ LAYOUT SHELL ============ */
+.app{display:flex; min-height:100vh;}
+
+/* -- Sidebar (desktop) -- */
+.sidebar{
+  width:var(--nav-w);
+  flex-shrink:0;
+  background:var(--white);
+  border-right:1px solid var(--line);
+  padding:24px 18px;
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.brand{
+  display:flex; align-items:center; gap:10px;
+  padding:6px 10px 22px 10px;
+}
+.brand .mark{
+  width:38px;height:38px;border-radius:12px;
+  background:linear-gradient(145deg,var(--coral),var(--coral-dark));
+  display:flex;align-items:center;justify-content:center;
+  font-size:19px; flex-shrink:0;
+  box-shadow: var(--shadow);
+}
+.brand span{font-family:var(--font-head); font-weight:700; font-size:22px;}
+.navlink{
+  display:flex; align-items:center; gap:14px;
+  padding:11px 12px; border-radius:var(--radius-s);
+  color:var(--charcoal-soft); font-weight:600; font-size:15px;
+  border:none; background:transparent; width:100%; text-align:left;
+  position:relative;
+}
+.navlink .ic{width:22px; text-align:center; font-size:18px;}
+.navlink:hover{background:var(--cream-2); color:var(--charcoal);}
+.navlink.active{background:var(--coral); color:#fff;}
+.navlink .badge{
+  margin-left:auto; background:var(--sage); color:#fff; font-size:11px;
+  font-weight:700; padding:2px 7px; border-radius:20px;
+}
+.navlink.active .badge{background:rgba(255,255,255,.3);}
+.sidebar .addpet-btn{
+  margin-top:14px;
+  background:var(--charcoal); color:var(--cream);
+  border:none; padding:12px; border-radius:var(--radius-s);
+  font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.sidebar .addpet-btn:hover{background:var(--coral);}
+.sidebar-foot{margin-top:auto; display:flex; align-items:center; gap:10px; padding-top:14px; border-top:1px solid var(--line);}
+.theme-toggle{
+  margin-left:auto; background:var(--cream-2); border:none; width:36px; height:36px;
+  border-radius:50%; font-size:16px; display:flex; align-items:center; justify-content:center;
+}
+.me-mini{display:flex; align-items:center; gap:9px; font-size:13px; font-weight:600;}
+.avatar{border-radius:50%; object-fit:cover; background:var(--cream-2); flex-shrink:0;}
+
+/* -- Topbar (mobile + search/actions on desktop) -- */
+.topbar{
+  position:sticky; top:0; z-index:30;
+  background:var(--white); border-bottom:1px solid var(--line);
+  padding:12px 20px; display:flex; align-items:center; gap:14px;
+}
+.hamburger{display:none; background:none; border:none; font-size:22px; color:var(--charcoal);}
+.searchbox{
+  flex:1; max-width:420px; display:flex; align-items:center; gap:8px;
+  background:var(--cream-2); border-radius:100px; padding:9px 16px;
+  border:1px solid transparent;
+}
+.searchbox:focus-within{border-color:var(--coral);}
+.searchbox input{border:none; background:none; outline:none; width:100%; font-size:14px; color:var(--charcoal); font-family:var(--font-body);}
+.top-actions{display:flex; align-items:center; gap:10px; margin-left:auto;}
+.icon-btn{
+  position:relative; width:40px; height:40px; border-radius:50%; border:none;
+  background:var(--cream-2); font-size:17px; display:flex; align-items:center; justify-content:center;
+  color:var(--charcoal);
+}
+.icon-btn:hover{background:var(--line);}
+.dot{
+  position:absolute; top:6px; right:7px; width:9px; height:9px; border-radius:50%;
+  background:var(--coral); border:2px solid var(--white);
+}
+.top-cta{
+  background:var(--coral); color:#fff; border:none; padding:10px 16px; border-radius:100px;
+  font-weight:700; font-size:13.5px; white-space:nowrap;
+}
+.top-cta:hover{background:var(--coral-dark);}
+
+/* -- Main columns -- */
+main.content{flex:1; min-width:0; padding:26px 24px 100px; max-width:1200px; margin:0 auto; width:100%;}
+.columns{display:grid; grid-template-columns:1fr 320px; gap:26px; align-items:start;}
+.rightcol{position:sticky; top:88px; display:flex; flex-direction:column; gap:18px;}
+.card{background:var(--white); border:1px solid var(--line); border-radius:var(--radius-m); box-shadow:var(--shadow);}
+.card-pad{padding:18px;}
+
+.page{display:none;}
+.page.active{display:block;}
+
+/* ============ STORIES ============ */
+.stories{display:flex; gap:16px; overflow-x:auto; padding:4px 2px 16px; margin-bottom:6px;}
+.story{display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0; width:72px; background:none; border:none;}
+.story .ring{
+  width:64px; height:64px; border-radius:50%; padding:3px;
+  background:conic-gradient(from 220deg, var(--coral), var(--sky), var(--sage), var(--coral));
+}
+.story.seen .ring{background:var(--line);}
+.story .ring img{width:100%; height:100%; border-radius:50%; object-fit:cover; border:2px solid var(--white);}
+.story span{font-size:11.5px; font-weight:600; color:var(--charcoal-soft); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;}
+.story.add-story .ring{background:var(--cream-2); display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--coral);}
+
+/* ============ POST CARD ============ */
+.post{margin-bottom:20px;}
+.post-head{display:flex; align-items:center; gap:11px; padding:16px 18px 10px;}
+.post-head .who{flex:1; min-width:0;}
+.post-head .petname{font-weight:700; font-size:15px;}
+.post-head .meta{font-size:12.5px; color:var(--charcoal-soft);}
+.post-head .more{background:none; border:none; color:var(--charcoal-soft); font-size:18px;}
+.post-media{width:100%; max-height:520px; object-fit:cover; background:var(--cream-2);}
+.post-body{padding:14px 18px 6px;}
+.post-caption{font-size:14.5px; line-height:1.5;}
+.post-caption b{font-weight:700;}
+.post-location{font-size:12.5px; color:var(--sky); margin-top:6px; font-weight:600;}
+.post-actions{display:flex; align-items:center; gap:6px; padding:8px 10px 14px;}
+.pill-btn{
+  display:flex; align-items:center; gap:6px; background:none; border:none; padding:8px 10px;
+  border-radius:100px; font-size:13.5px; font-weight:600; color:var(--charcoal-soft);
+}
+.pill-btn:hover{background:var(--cream-2);}
+.pill-btn.liked{color:var(--coral);}
+.pill-btn.saved{color:var(--sage-dark);}
+.pill-btn.save-btn{margin-left:auto;}
+.comment-box{padding:0 18px 16px; display:none; border-top:1px solid var(--line); margin-top:4px;}
+.comment-box.open{display:block; padding-top:12px;}
+.comment{display:flex; gap:8px; font-size:13.5px; margin-bottom:8px;}
+.comment b{font-weight:700;}
+.comment-input{display:flex; gap:8px; align-items:center; margin-top:6px;}
+.comment-input input{flex:1; border:1px solid var(--line); background:var(--cream-2); border-radius:100px; padding:9px 14px; font-size:13.5px; font-family:var(--font-body); color:var(--charcoal);}
+.comment-input button{background:var(--coral); color:#fff; border:none; padding:9px 16px; border-radius:100px; font-weight:700; font-size:12.5px;}
+
+/* ============ SECTION HEADERS ============ */
+.sect-title{display:flex; align-items:baseline; justify-content:space-between; margin:6px 0 16px;}
+.sect-title h2{font-size:22px;}
+.sect-title a{font-size:13px; font-weight:700; color:var(--coral);}
+
+/* ============ GRIDS ============ */
+.grid{display:grid; gap:16px;}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.tile{border-radius:var(--radius-m); overflow:hidden; position:relative; background:var(--white); border:1px solid var(--line); box-shadow:var(--shadow);}
+.tile img{width:100%; height:190px; object-fit:cover;}
+.tile-body{padding:12px 14px;}
+.tile-body h4{font-size:14.5px;}
+.tile-body p{margin:4px 0 0; font-size:12.5px; color:var(--charcoal-soft);}
+.tag{display:inline-block; background:var(--cream-2); color:var(--charcoal-soft); font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:100px; margin:3px 4px 0 0;}
+
+/* Sidebar widgets */
+.widget h3{font-size:15.5px; margin-bottom:12px;}
+.hashtag-row{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line); font-size:13.5px;}
+.hashtag-row:last-child{border-bottom:none;}
+.hashtag-row b{color:var(--coral); font-weight:700;}
+.hashtag-row span{color:var(--charcoal-soft); font-size:12px;}
+.suggest-row{display:flex; align-items:center; gap:10px; padding:8px 0;}
+.suggest-row .who{flex:1; min-width:0;}
+.suggest-row .who b{display:block; font-size:13.5px;}
+.suggest-row .who span{font-size:11.5px; color:var(--charcoal-soft);}
+.mini-follow{border:1px solid var(--coral); color:var(--coral); background:none; border-radius:100px; padding:5px 12px; font-size:12px; font-weight:700; flex-shrink:0;}
+.mini-follow.following{background:var(--coral); color:#fff;}
+
+/* ============ COMMUNITIES ============ */
+.comm-card{overflow:hidden;}
+.comm-cover{height:110px; background-size:cover; background-position:center;}
+.comm-body{padding:16px;}
+.comm-body .icon{font-size:26px; margin-bottom:6px;}
+.comm-body h4{font-size:16px;}
+.comm-body p{font-size:13px; color:var(--charcoal-soft); margin:6px 0 10px; line-height:1.45;}
+.comm-body .count{font-size:12px; color:var(--charcoal-soft); font-weight:600;}
+.join-btn{background:var(--sage); color:#fff; border:none; padding:9px 0; width:100%; border-radius:var(--radius-s); font-weight:700; font-size:13px; margin-top:10px;}
+.join-btn.joined{background:var(--cream-2); color:var(--charcoal-soft);}
+
+/* ============ ADOPTION ============ */
+.adopt-card .tile-body .badge-adopt{
+  position:absolute; top:10px; left:10px; background:var(--sage); color:#fff; font-size:11px; font-weight:700; padding:4px 10px; border-radius:100px;
+}
+.learn-btn{width:100%; margin-top:10px; background:var(--charcoal); color:var(--cream); border:none; padding:9px; border-radius:var(--radius-s); font-weight:700; font-size:13px;}
+.learn-btn:hover{background:var(--coral);}
+
+/* ============ PROFILE ============ */
+.profile-cover{height:150px; border-radius:var(--radius-l); background:linear-gradient(120deg,var(--sky),var(--sage)); position:relative; margin-bottom:56px;}
+.profile-pic{
+  width:104px; height:104px; border-radius:50%; border:5px solid var(--cream); object-fit:cover;
+  position:absolute; left:28px; bottom:-42px; background:var(--cream-2);
+}
+.profile-head{display:flex; align-items:flex-end; gap:14px; padding:0 4px 18px; flex-wrap:wrap;}
+.profile-head .info h2{font-size:24px;}
+.profile-head .info p{margin:4px 0 0; color:var(--charcoal-soft); font-size:14px;}
+.profile-head .actions{margin-left:auto; display:flex; gap:10px;}
+.btn{border:none; padding:10px 18px; border-radius:100px; font-weight:700; font-size:13.5px;}
+.btn-primary{background:var(--coral); color:#fff;}
+.btn-primary.following{background:var(--cream-2); color:var(--charcoal);}
+.btn-ghost{background:var(--cream-2); color:var(--charcoal);}
+.stat-row{display:flex; gap:26px; padding:14px 4px 6px; border-top:1px solid var(--line); margin-top:6px;}
+.stat-row div{font-size:13.5px; color:var(--charcoal-soft);}
+.stat-row b{color:var(--charcoal); font-size:16px; display:block;}
+.tabs{display:flex; gap:6px; margin:18px 0 18px; border-bottom:1px solid var(--line);}
+.tab{background:none; border:none; padding:12px 16px; font-weight:700; font-size:13.5px; color:var(--charcoal-soft); border-bottom:2px solid transparent;}
+.tab.active{color:var(--coral); border-color:var(--coral);}
+.about-line{display:flex; gap:10px; font-size:13.5px; padding:6px 0; color:var(--charcoal-soft);}
+.about-line b{color:var(--charcoal); min-width:100px;}
+
+/* ============ MESSAGES ============ */
+.msg-shell{display:grid; grid-template-columns:300px 1fr; border:1px solid var(--line); border-radius:var(--radius-m); overflow:hidden; background:var(--white); box-shadow:var(--shadow); height:calc(100vh - 160px); min-height:460px;}
+.conv-list{border-right:1px solid var(--line); overflow-y:auto;}
+.conv-list h3{padding:16px 16px 8px; font-size:16px;}
+.conv{display:flex; align-items:center; gap:10px; padding:11px 16px; border-left:3px solid transparent;}
+.conv:hover, .conv.active{background:var(--cream-2); border-color:var(--coral);}
+.conv .who{flex:1; min-width:0;}
+.conv b{font-size:13.5px; display:block;}
+.conv span{font-size:12px; color:var(--charcoal-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;}
+.online-dot{width:9px; height:9px; border-radius:50%; background:var(--sage); border:2px solid var(--white); position:relative; top:14px; right:12px;}
+.chat-area{display:flex; flex-direction:column;}
+.chat-head{padding:14px 18px; border-bottom:1px solid var(--line); font-weight:700; display:flex; align-items:center; gap:10px;}
+.chat-head span{font-size:11.5px; font-weight:600; color:var(--sage-dark);}
+.chat-body{flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:10px;}
+.bubble{max-width:64%; padding:10px 14px; border-radius:16px; font-size:13.5px; line-height:1.4;}
+.bubble.them{background:var(--cream-2); align-self:flex-start; border-bottom-left-radius:4px;}
+.bubble.me{background:var(--coral); color:#fff; align-self:flex-end; border-bottom-right-radius:4px;}
+.chat-input{display:flex; gap:10px; padding:14px; border-top:1px solid var(--line);}
+.chat-input input{flex:1; border:1px solid var(--line); background:var(--cream-2); border-radius:100px; padding:11px 16px; font-size:13.5px; color:var(--charcoal); font-family:var(--font-body);}
+.chat-input button{background:var(--coral); color:#fff; border:none; padding:0 18px; border-radius:100px; font-weight:700; font-size:13px;}
+
+/* ============ NOTIFICATIONS PANEL ============ */
+.notif-item{display:flex; gap:12px; padding:14px 4px; border-bottom:1px solid var(--line);}
+.notif-item:last-child{border-bottom:none;}
+.notif-item .ic-wrap{width:38px; height:38px; border-radius:50%; background:var(--cream-2); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;}
+.notif-item p{margin:0; font-size:13.5px;}
+.notif-item span{font-size:12px; color:var(--charcoal-soft);}
+.notif-item.unread{background:rgba(255,122,92,0.06); border-radius:var(--radius-s);}
+
+/* ============ FORM / MODAL ============ */
+.overlay{position:fixed; inset:0; background:rgba(30,25,20,.5); display:none; align-items:flex-start; justify-content:center; z-index:100; padding:40px 16px; overflow-y:auto;}
+.overlay.open{display:flex;}
+.modal{background:var(--white); border-radius:var(--radius-l); width:100%; max-width:560px; box-shadow:var(--shadow-lg); animation:pop .18s ease;}
+@keyframes pop{from{transform:scale(.96); opacity:0;} to{transform:scale(1); opacity:1;}}
+.modal-head{display:flex; align-items:center; padding:18px 22px; border-bottom:1px solid var(--line);}
+.modal-head h3{font-size:18px;}
+.modal-close{margin-left:auto; background:var(--cream-2); border:none; width:32px; height:32px; border-radius:50%; font-size:16px;}
+.modal-body{padding:22px; max-height:70vh; overflow-y:auto;}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:12.5px; font-weight:700; margin-bottom:6px; color:var(--charcoal-soft);}
+.field input, .field select, .field textarea{
+  width:100%; border:1.5px solid var(--line); background:var(--cream-2); border-radius:var(--radius-s);
+  padding:11px 13px; font-size:14px; font-family:var(--font-body); color:var(--charcoal); resize:vertical;
+}
+.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--coral); outline:none;}
+.field small{color:var(--coral); display:none; font-size:11.5px; margin-top:4px;}
+.field.error input, .field.error select, .field.error textarea{border-color:var(--coral);}
+.field.error small{display:block;}
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.upload-box{
+  border:2px dashed var(--line); border-radius:var(--radius-m); padding:26px; text-align:center;
+  color:var(--charcoal-soft); font-size:13.5px; cursor:pointer; background:var(--cream-2);
+}
+.upload-box img{max-height:160px; margin:0 auto; border-radius:var(--radius-s);}
+.upload-box input{display:none;}
+.privacy-opts{display:flex; gap:8px;}
+.priv-chip{flex:1; text-align:center; padding:9px; border:1.5px solid var(--line); border-radius:var(--radius-s); font-size:12.5px; font-weight:700; color:var(--charcoal-soft);}
+.priv-chip.selected{border-color:var(--coral); background:rgba(255,122,92,.08); color:var(--coral);}
+.modal-foot{padding:16px 22px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:10px;}
+.btn-submit{background:var(--coral); color:#fff; border:none; padding:11px 22px; border-radius:100px; font-weight:700; font-size:14px;}
+.btn-cancel{background:none; border:none; color:var(--charcoal-soft); padding:11px 16px; font-weight:600; font-size:14px;}
+
+/* dropdown panels (notifications) */
+.dropdown-panel{
+  position:absolute; top:56px; right:20px; width:360px; max-height:70vh; overflow-y:auto;
+  background:var(--white); border:1px solid var(--line); border-radius:var(--radius-m); box-shadow:var(--shadow-lg);
+  padding:14px 16px; display:none; z-index:60;
+}
+.dropdown-panel.open{display:block;}
+.dropdown-panel h3{font-size:16px; margin-bottom:8px;}
+
+/* ============ TOAST ============ */
+.toast-wrap{position:fixed; bottom:26px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center;}
+.toast{background:var(--charcoal); color:var(--cream); padding:11px 20px; border-radius:100px; font-size:13.5px; font-weight:600; box-shadow:var(--shadow-lg); opacity:0; transform:translateY(10px); transition:all .25s ease;}
+.toast.show{opacity:1; transform:translateY(0);}
+
+/* ============ STORY VIEWER ============ */
+.story-viewer{position:fixed; inset:0; background:#000; display:none; z-index:150; align-items:center; justify-content:center;}
+.story-viewer.open{display:flex;}
+.sv-card{width:min(400px,92vw); height:min(680px,86vh); border-radius:var(--radius-l); overflow:hidden; position:relative; background:linear-gradient(160deg,var(--coral),var(--sage));}
+.sv-bar{position:absolute; top:10px; left:10px; right:10px; height:3px; background:rgba(255,255,255,.35); border-radius:4px; overflow:hidden;}
+.sv-bar i{display:block; height:100%; width:0%; background:#fff; animation:svfill 4s linear forwards;}
+@keyframes svfill{to{width:100%;}}
+.sv-head{position:absolute; top:22px; left:14px; right:14px; display:flex; align-items:center; gap:8px; color:#fff; font-weight:700; font-size:13.5px;}
+.sv-head img{width:30px; height:30px; border-radius:50%; border:2px solid #fff; object-fit:cover;}
+.sv-close{margin-left:auto; background:rgba(0,0,0,.3); border:none; color:#fff; width:28px; height:28px; border-radius:50%;}
+.sv-content{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; padding:40px; font-family:var(--font-head); font-size:20px;}
+.sv-nav{position:absolute; top:0; bottom:0; width:50%;}
+.sv-nav.left{left:0;} .sv-nav.right{right:0;}
+
+/* ============ EMPTY STATE / LOADER ============ */
+.empty{text-align:center; padding:60px 20px; color:var(--charcoal-soft);}
+.empty .em-ic{font-size:40px; margin-bottom:10px;}
+.loader{display:flex; justify-content:center; padding:30px;}
+.spinner{width:30px; height:30px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--coral); animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ============ MOBILE BOTTOM NAV ============ */
+.bottom-nav{
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:40;
+  background:var(--white); border-top:1px solid var(--line);
+  justify-content:space-around; padding:8px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.bottom-nav button{background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10.5px; color:var(--charcoal-soft); font-weight:700; flex:1;}
+.bottom-nav button .ic{font-size:19px;}
+.bottom-nav button.active{color:var(--coral);}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1080px){
+  .columns{grid-template-columns:1fr;}
+  .rightcol{position:static; display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+}
+@media (max-width:860px){
+  .sidebar{display:none;}
+  .hamburger{display:block;}
+  .bottom-nav{display:flex;}
+  main.content{padding:18px 14px 90px;}
+  .rightcol{grid-template-columns:1fr;}
+  .msg-shell{grid-template-columns:1fr; height:auto;}
+  .conv-list{max-height:220px;}
+  .grid-3{grid-template-columns:repeat(2,1fr);}
+  .top-cta span.long{display:none;}
+}
+@media (max-width:560px){
+  .grid-3, .grid-2{grid-template-columns:1fr 1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .profile-head{align-items:flex-start;}
+  .profile-head .actions{margin-left:0; width:100%;}
+}
+
+/* mobile off-canvas sidebar as drawer */
+.drawer-overlay{position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:70; display:none;}
+.drawer-overlay.open{display:block;}
+.sidebar.drawer{
+  display:flex; position:fixed; left:0; top:0; bottom:0; z-index:80;
+  transform:translateX(-110%); transition:transform .25s ease; box-shadow:var(--shadow-lg);
+}
+.sidebar.drawer.open{transform:translateX(0);}
+@media (min-width:861px){ .sidebar.drawer{display:none;} }
+</style>
+</head>
+<body data-theme="light">
+
+<div class="app">
+
+  <!-- ===================== SIDEBAR (desktop) ===================== -->
+  <nav class="sidebar" id="sidebarDesktop">
+    <div class="brand"><div class="mark">🐾</div><span>Furfeed</span></div>
+    <button class="navlink active" data-page="home"><span class="ic">🏠</span>Home</button>
+    <button class="navlink" data-page="explore"><span class="ic">🧭</span>Explore</button>
+    <button class="navlink" data-page="communities"><span class="ic">👥</span>Communities</button>
+    <button class="navlink" data-page="messages"><span class="ic">💬</span>Messages <span class="badge" id="msgBadgeNav">3</span></button>
+    <button class="navlink" data-page="notifications"><span class="ic">🔔</span>Notifications <span class="badge" id="notifBadgeNav">5</span></button>
+    <button class="navlink" data-page="adoption"><span class="ic">🏡</span>Adoption</button>
+    <button class="navlink" data-page="profile"><span class="ic">🐶</span>Profile</button>
+    <button class="addpet-btn" id="addPetBtnSidebar">➕ Add Pet</button>
+    <div class="sidebar-foot">
+      <div class="me-mini">
+        <img class="avatar" src="https://i.pravatar.cc/60?img=47" width="34" height="34" alt="">
+        <span>Amelia R.</span>
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+    </div>
+  </nav>
+
+  <!-- mobile drawer clone -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <nav class="sidebar drawer" id="sidebarMobile">
+    <div class="brand"><div class="mark">🐾</div><span>Furfeed</span></div>
+    <button class="navlink active" data-page="home"><span class="ic">🏠</span>Home</button>
+    <button class="navlink" data-page="explore"><span class="ic">🧭</span>Explore</button>
+    <button class="navlink" data-page="communities"><span class="ic">👥</span>Communities</button>
+    <button class="navlink" data-page="messages"><span class="ic">💬</span>Messages</button>
+    <button class="navlink" data-page="notifications"><span class="ic">🔔</span>Notifications</button>
+    <button class="navlink" data-page="adoption"><span class="ic">🏡</span>Adoption</button>
+    <button class="navlink" data-page="profile"><span class="ic">🐶</span>Profile</button>
+    <button class="addpet-btn" id="addPetBtnMobile">➕ Add Pet</button>
+  </nav>
+
+  <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+    <!-- ===================== TOPBAR ===================== -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburgerBtn">☰</button>
+      <div class="searchbox">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Search pets, breeds, #hashtags, communities…">
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="notifBtn">🔔<span class="dot"></span></button>
+        <button class="icon-btn" id="createPostBtnTop">➕</button>
+        <button class="top-cta" id="addPetBtnTop">🐾 <span class="long">Add Pet</span></button>
+      </div>
+    </header>
+
+    <!-- notifications dropdown -->
+    <div class="dropdown-panel" id="notifPanel">
+      <h3>Notifications</h3>
+      <div id="notifList"></div>
+    </div>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <main class="content">
+
+      <!-- ---------- HOME PAGE ---------- -->
+      <section class="page active" id="page-home">
+        <div class="columns">
+          <div>
+            <div class="stories" id="storiesRow"></div>
+            <div id="feedList"></div>
+          </div>
+          <aside class="rightcol">
+            <div class="card card-pad widget">
+              <h3>Trending hashtags</h3>
+              <div id="hashtagWidget"></div>
+            </div>
+            <div class="card card-pad widget">
+              <h3>Pets to follow</h3>
+              <div id="suggestWidget"></div>
+            </div>
+            <div class="card card-pad widget">
+              <h3>Pets looking for homes</h3>
+              <div id="adoptWidget"></div>
+              <a href="#" data-page="adoption" style="display:block; text-align:center; margin-top:10px; font-size:12.5px; font-weight:700; color:var(--coral);">See all →</a>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ---------- EXPLORE PAGE ---------- -->
+      <section class="page" id="page-explore">
+        <div class="sect-title"><h2>Trending pets</h2></div>
+        <div class="grid grid-3" id="exploreTrendingPets"></div>
+        <div class="sect-title"><h2>Popular posts</h2></div>
+        <div class="grid grid-3" id="explorePopularPosts"></div>
+        <div class="sect-title"><h2>New pet profiles</h2></div>
+        <div class="grid grid-3" id="exploreNewPets"></div>
+        <div class="sect-title"><h2>Trending hashtags</h2></div>
+        <div id="exploreHashtags" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
+        <div class="sect-title"><h2>Popular communities</h2></div>
+        <div class="grid grid-3" id="explorePopularComm"></div>
+      </section>
+
+      <!-- ---------- SEARCH RESULTS PAGE ---------- -->
+      <section class="page" id="page-search">
+        <div class="sect-title"><h2 id="searchTitle">Search results</h2></div>
+        <div id="searchResults"></div>
+      </section>
+
+      <!-- ---------- COMMUNITIES PAGE ---------- -->
+      <section class="page" id="page-communities">
+        <div class="sect-title"><h2>Pet communities</h2><span style="font-size:12.5px; color:var(--charcoal-soft);">Find your pet's people</span></div>
+        <div class="grid grid-3" id="communitiesGrid"></div>
+      </section>
+
+      <!-- ---------- ADOPTION PAGE ---------- -->
+      <section class="page" id="page-adoption">
+        <div class="sect-title"><h2>Pets looking for homes</h2><span style="font-size:12.5px; color:var(--charcoal-soft);">Every good home starts with a hello</span></div>
+        <div class="grid grid-3" id="adoptionGrid"></div>
+      </section>
+
+      <!-- ---------- MESSAGES PAGE ---------- -->
+      <section class="page" id="page-messages">
+        <div class="msg-shell">
+          <div class="conv-list" id="convList"></div>
+          <div class="chat-area">
+            <div class="chat-head" id="chatHead"></div>
+            <div class="chat-body" id="chatBody"></div>
+            <div class="chat-input">
+              <input type="text" id="chatInput" placeholder="Type a message… 🐾">
+              <button id="chatSendBtn">Send</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- NOTIFICATIONS PAGE ---------- -->
+      <section class="page" id="page-notifications">
+        <div class="sect-title"><h2>Notifications</h2></div>
+        <div class="card card-pad" id="notifPageList"></div>
+      </section>
+
+      <!-- ---------- USER PROFILE PAGE ---------- -->
+      <section class="page" id="page-profile">
+        <div class="profile-cover">
+          <img class="profile-pic" src="https://i.pravatar.cc/200?img=47" alt="">
+        </div>
+        <div class="profile-head">
+          <div class="info">
+            <h2>Amelia R.</h2>
+            <p>@amelia.and.the.gang · Dog mom ×2, cat mom ×1 🐶🐶🐱 · Portland, OR</p>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost" id="shareProfileBtn">Share profile</button>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div><b>3</b>Pets</div>
+          <div><b>412</b>Posts</div>
+          <div><b>2,840</b>Followers</div>
+          <div><b>318</b>Following</div>
+        </div>
+        <div class="tabs" id="profileTabs">
+          <button class="tab active" data-tab="posts">Posts</button>
+          <button class="tab" data-tab="pets">Pets</button>
+          <button class="tab" data-tab="saved">Saved</button>
+          <button class="tab" data-tab="communities">Communities</button>
+        </div>
+        <div id="tab-posts" class="tab-panel"><div class="grid grid-3" id="profilePostsGrid"></div></div>
+        <div id="tab-pets" class="tab-panel" style="display:none;"><div class="grid grid-3" id="profilePetsGrid"></div></div>
+        <div id="tab-saved" class="tab-panel" style="display:none;"><div class="grid grid-3" id="profileSavedGrid"></div></div>
+        <div id="tab-communities" class="tab-panel" style="display:none;"><div class="grid grid-3" id="profileCommGrid"></div></div>
+      </section>
+
+      <!-- ---------- PET PROFILE PAGE (template) ---------- -->
+      <section class="page" id="page-pet">
+        <div class="profile-cover" style="background:linear-gradient(120deg,var(--coral),var(--sky));">
+          <img class="profile-pic" id="petProfilePic" src="" alt="">
+        </div>
+        <div class="profile-head">
+          <div class="info">
+            <h2 id="petProfileName"></h2>
+            <p id="petProfileSub"></p>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" id="petFollowBtn">Follow</button>
+            <button class="btn btn-ghost">Message</button>
+            <button class="btn btn-ghost" id="petShareBtn">Share</button>
+          </div>
+        </div>
+        <div class="stat-row" id="petStatRow"></div>
+        <div style="margin:18px 4px; font-size:13.5px; color:var(--charcoal-soft); line-height:1.6;" id="petBioBlock"></div>
+        <div class="sect-title"><h2 style="font-size:17px;">Photos & videos</h2></div>
+        <div class="grid grid-3" id="petPhotoGrid"></div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== BOTTOM NAV (mobile) ===================== -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="active" data-page="home"><span class="ic">🏠</span>Home</button>
+  <button data-page="explore"><span class="ic">🧭</span>Explore</button>
+  <button id="bottomCreate"><span class="ic">➕</span>Create</button>
+  <button data-page="messages"><span class="ic">💬</span>Messages</button>
+  <button data-page="profile"><span class="ic">🐶</span>Profile</button>
+</nav>
+
+<!-- ===================== ADD PET MODAL ===================== -->
+<div class="overlay" id="addPetOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Add your pet 🐾</h3><button class="modal-close" data-close="addPetOverlay">✕</button></div>
+    <form id="addPetForm">
+      <div class="modal-body">
+        <div class="field">
+          <label>Profile photo</label>
+          <label class="upload-box" id="petPhotoBox">
+            <span id="petPhotoText">Click to upload a photo of your pet 📷</span>
+            <input type="file" accept="image/*" id="petPhotoInput">
+          </label>
+        </div>
+        <div class="two-col">
+          <div class="field" data-req>
+            <label>Pet name</label>
+            <input type="text" name="name" placeholder="e.g. Biscuit">
+            <small>Please enter your pet's name.</small>
+          </div>
+          <div class="field" data-req>
+            <label>Species</label>
+            <select name="species">
+              <option value="">Choose one</option>
+              <option>Dog</option><option>Cat</option><option>Rabbit</option><option>Bird</option><option>Fish</option><option>Small pet</option><option>Other</option>
+            </select>
+            <small>Please choose a species.</small>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <label>Breed</label>
+            <input type="text" name="breed" placeholder="e.g. Golden Retriever">
+          </div>
+          <div class="field">
+            <label>Gender</label>
+            <select name="gender"><option value="">Choose one</option><option>Male</option><option>Female</option><option>Unknown</option></select>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="field" data-req>
+            <label>Age</label>
+            <input type="text" name="age" placeholder="e.g. 2 years">
+            <small>Please enter an age.</small>
+          </div>
+          <div class="field">
+            <label>Birthday</label>
+            <input type="date" name="birthday">
+          </div>
+        </div>
+        <div class="field">
+          <label>Location</label>
+          <input type="text" name="location" placeholder="e.g. Portland, OR">
+        </div>
+        <div class="field">
+          <label>Short bio</label>
+          <textarea name="bio" rows="2" placeholder="Tell the world about your pet…"></textarea>
+        </div>
+        <div class="field">
+          <label>Favorite activities</label>
+          <input type="text" name="activities" placeholder="e.g. Fetch, naps, beach days">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn-cancel" data-close="addPetOverlay">Cancel</button>
+        <button type="submit" class="btn-submit">Add pet</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== CREATE POST MODAL ===================== -->
+<div class="overlay" id="createPostOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Create a post</h3><button class="modal-close" data-close="createPostOverlay">✕</button></div>
+    <form id="createPostForm">
+      <div class="modal-body">
+        <div class="field">
+          <label>Photo or video</label>
+          <label class="upload-box" id="postMediaBox">
+            <span id="postMediaText">Click to upload a photo or video 📷</span>
+            <input type="file" accept="image/*,video/*" id="postMediaInput">
+          </label>
+        </div>
+        <div class="field" data-req>
+          <label>Caption</label>
+          <textarea name="caption" rows="3" placeholder="What's your pet up to today?"></textarea>
+          <small>Please write a caption.</small>
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <label>Hashtags</label>
+            <input type="text" name="hashtags" placeholder="#PetLife #PuppyLove">
+          </div>
+          <div class="field">
+            <label>Location</label>
+            <input type="text" name="location" placeholder="e.g. Sunset Beach">
+          </div>
+        </div>
+        <div class="field">
+          <label>Tag a pet</label>
+          <select name="tagpet" id="tagPetSelect"><option value="">None</option></select>
+        </div>
+        <div class="field">
+          <label>Privacy</label>
+          <div class="privacy-opts" id="privacyOpts">
+            <div class="priv-chip selected" data-val="Public">🌍 Public</div>
+            <div class="priv-chip" data-val="Followers">👥 Followers</div>
+            <div class="priv-chip" data-val="Private">🔒 Private</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn-cancel" data-close="createPostOverlay">Cancel</button>
+        <button type="submit" class="btn-submit">Post</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== STORY VIEWER ===================== -->
+<div class="story-viewer" id="storyViewer">
+  <button class="sv-nav left" id="svPrev"></button>
+  <button class="sv-nav right" id="svNext"></button>
+  <div class="sv-card">
+    <div class="sv-bar"><i id="svFill"></i></div>
+    <div class="sv-head"><img id="svAvatar" src="" alt=""><span id="svName"></span><button class="sv-close" id="svClose">✕</button></div>
+    <div class="sv-content" id="svContent"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ======================================================================
+   MOCK DATA
+====================================================================== */
+const pets = [
+  {id:'p1', name:'Max', species:'Dog', breed:'Labrador Retriever', age:'3 years', gender:'Male', birthday:'2022-04-11', location:'San Diego, CA', bio:'Professional stick fetcher. Beach connoisseur.', activities:'Swimming, fetch, belly rubs', owner:'@jake.parker', pic:'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&q=80', followers:1840, following:120, posts:64},
+  {id:'p2', name:'Luna', species:'Cat', breed:'British Shorthair', age:'2 years', gender:'Female', birthday:'2023-01-20', location:'Austin, TX', bio:'Napping is a full-time job and I am the CEO.', activities:'Sleeping, sunbeams, judging humans', owner:'@sophie.w', pic:'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=400&q=80', followers:2760, following:88, posts:112},
+  {id:'p3', name:'Coco', species:'Rabbit', breed:'Holland Lop', age:'8 months', gender:'Female', birthday:'2025-12-02', location:'Denver, CO', bio:'Newest member of the family. Loves lettuce and chin scritches.', activities:'Hopping, binkies, snacking', owner:'@thegreenfamily', pic:'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=400&q=80', followers:530, following:44, posts:19},
+  {id:'p4', name:'Milo', species:'Dog', breed:'Corgi', age:'4 years', gender:'Male', birthday:'2021-06-15', location:'Seattle, WA', bio:'Short legs, big personality. Zoomie champion.', activities:'Zoomies, treats, car rides', owner:'@rileyk', pic:'https://images.unsplash.com/photo-1612195583950-b8fd34c87093?w=400&q=80', followers:4210, following:210, posts:203},
+  {id:'p5', name:'Pepper', species:'Bird', breed:'Cockatiel', age:'1 year', gender:'Male', birthday:'2024-09-01', location:'Miami, FL', bio:'Whistles show tunes on request.', activities:'Whistling, mirror time, millet', owner:'@ana.torres', pic:'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&q=80', followers:960, following:60, posts:41},
+  {id:'p6', name:'Nemo', species:'Fish', breed:'Betta', age:'6 months', gender:'Unknown', birthday:'2026-02-14', location:'Chicago, IL', bio:'Lives his best life in a 10 gallon planted tank.', activities:'Flaring, bubble nests', owner:'@finn.tanks', pic:'https://images.unsplash.com/photo-1524704796725-9fc3044a58b2?w=400&q=80', followers:310, following:12, posts:9},
+  {id:'p7', name:'Biscuit', species:'Dog', breed:'Golden Retriever', age:'5 years', gender:'Male', birthday:'2020-03-08', location:'Portland, OR', bio:'Amelia\'s good boy. Certified couch potato and hiking buddy.', activities:'Hiking, fetch, snoozing', owner:'@amelia.and.the.gang', pic:'https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&q=80', followers:1520, following:340, posts:96},
+  {id:'p8', name:'Waffles', species:'Cat', breed:'Tabby', age:'3 years', gender:'Male', birthday:'2022-11-04', location:'Portland, OR', bio:'Amelia\'s second-in-command. Keyboard warmer.', activities:'Knocking things over, sunbathing', owner:'@amelia.and.the.gang', pic:'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400&q=80', followers:980, following:150, posts:58},
+  {id:'p9', name:'Peanut', species:'Small pet', breed:'Guinea Pig', age:'1 year', gender:'Female', birthday:'2025-05-19', location:'Portland, OR', bio:'Amelia\'s squeakiest roommate.', activities:'Popcorning, veggie snacks', owner:'@amelia.and.the.gang', pic:'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=400&q=80', followers:410, following:30, posts:22},
+  {id:'p10', name:'Ziggy', species:'Dog', breed:'Australian Shepherd', age:'2 years', gender:'Male', birthday:'2024-02-18', location:'Boulder, CO', bio:'Frisbee-obsessed and always ready for the next adventure.', activities:'Frisbee, trail runs, agility courses', owner:'@markd.hikes', pic:'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400&q=80', followers:2210, following:190, posts:88},
+  {id:'p11', name:'Mochi', species:'Cat', breed:'Scottish Fold', age:'1 year', gender:'Female', birthday:'2025-03-30', location:'Los Angeles, CA', bio:'Round ears, rounder attitude. Professional blanket burrower.', activities:'Burrowing, chasing laser dots, snack negotiations', owner:'@laurenc', pic:'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=400&q=80', followers:3450, following:95, posts:74},
+  {id:'p12', name:'Turbo', species:'Small pet', breed:'Syrian Hamster', age:'7 months', gender:'Male', birthday:'2025-11-10', location:'Minneapolis, MN', bio:'Wheel speed record holder in his household.', activities:'Wheel running, seed hoarding, tunnel digging', owner:'@nateb', pic:'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=400&q=80', followers:670, following:20, posts:15},
+  {id:'p13', name:'Olive', species:'Dog', breed:'French Bulldog', age:'3 years', gender:'Female', birthday:'2023-07-22', location:'Brooklyn, NY', bio:'Snores louder than the subway. Loves a good sweater.', activities:'Napping, people-watching, snack breaks', owner:'@priyam', pic:'https://images.unsplash.com/photo-1583512603806-077998240c7a?w=400&q=80', followers:5120, following:280, posts:151},
+  {id:'p14', name:'Finn', species:'Fish', breed:'Goldfish', age:'2 years', gender:'Unknown', birthday:'2024-01-05', location:'Tampa, FL', bio:'King of a 20 gallon castle-themed tank.', activities:'Swimming laps, bubble watching', owner:'@finn.tanks', pic:'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=400&q=80', followers:220, following:8, posts:6},
+  {id:'p15', name:'Daisy', species:'Rabbit', breed:'Dutch Rabbit', age:'2 years', gender:'Female', birthday:'2024-05-01', location:'Salt Lake City, UT', bio:'Litter-trained escape artist. Loves cardboard forts.', activities:'Digging, binkies, cardboard demolition', owner:'@bunnymomjess', pic:'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=400&q=80', followers:1490, following:66, posts:53},
+  {id:'p16', name:'Kiwi', species:'Bird', breed:'Budgerigar', age:'2 years', gender:'Female', birthday:'2024-04-14', location:'Phoenix, AZ', bio:'Learned to say "good bird" and hasn\'t stopped since.', activities:'Talking, seed foraging, bell ringing', owner:'@ana.torres', pic:'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=400&q=80', followers:830, following:40, posts:34},
+];
+
+const posts = [
+  {id:'post1', petId:'p1', caption:"Max had his first beach day today! Zero regrets, all sand. 🐶🌊", location:'Ocean Beach, San Diego', time:'2h ago', img:'https://images.unsplash.com/photo-1544568100-847a948585b9?w=900&q=80', likes:284, comments:[{u:'@sophie.w',t:'This is the happiest dog I have ever seen 😭'}], liked:false, saved:false, hashtags:'#PetLife #DogLovers #BeachDay'},
+  {id:'post2', petId:'p2', caption:"Luna discovered a new favorite sleeping spot. 🐱💤", location:'Home, Austin', time:'4h ago', img:'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=900&q=80', likes:512, comments:[{u:'@jake.parker',t:'Living her best life'}], liked:true, saved:false, hashtags:'#CatLife #NapQueen'},
+  {id:'post3', petId:'p3', caption:"Meet our newest family member, Coco! Still learning the house rules (mostly ignoring them). 🐰❤️", location:'Denver, CO', time:'6h ago', img:'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=900&q=80', likes:198, comments:[], liked:false, saved:true, hashtags:'#RabbitOwners #AdoptDontShop'},
+  {id:'post4', petId:'p4', caption:"Corgi legs were not built for these stairs but I refuse to accept help.", location:'Seattle, WA', time:'9h ago', img:'https://images.unsplash.com/photo-1612195583950-b8fd34c87093?w=900&q=80', likes:1340, comments:[{u:'@amelia.and.the.gang',t:'The determination 😂'}], liked:false, saved:false, hashtags:'#CorgiLife #ShortLegsBigHeart'},
+  {id:'post5', petId:'p7', caption:"Sunday hike with my favorite human. Found three good sticks and one questionable smell.", location:'Forest Park, Portland', time:'1d ago', img:'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=900&q=80', likes:670, comments:[], liked:false, saved:false, hashtags:'#PetFriends #HikingDog'},
+  {id:'post6', petId:'p5', caption:"Learned a new whistle today. Neighbors have... opinions.", location:'Miami, FL', time:'1d ago', img:'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?w=900&q=80', likes:412, comments:[], liked:false, saved:false, hashtags:'#BirdLovers #CutePets'},
+  {id:'post7', petId:'p10', caption:"Ziggy caught the frisbee mid-air for the first time and I have never been prouder of anyone in my life.", location:'Chautauqua Park, Boulder', time:'1d ago', img:'https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?w=900&q=80', likes:892, comments:[{u:'@rileyk',t:'Athlete of the year 🏆'}], liked:false, saved:false, hashtags:'#PetFriends #AussieShepherd'},
+  {id:'post8', petId:'p11', caption:"Mochi has claimed the entire laundry basket as her personal throne. Negotiations failed.", location:'Los Angeles, CA', time:'2d ago', img:'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=900&q=80', likes:1105, comments:[], liked:false, saved:false, hashtags:'#CatLife #CutePets'},
+  {id:'post9', petId:'p13', caption:"Olive tried on her new sweater and immediately demanded a nap to recover from the excitement.", location:'Brooklyn, NY', time:'2d ago', img:'https://images.unsplash.com/photo-1583512603806-077998240c7a?w=900&q=80', likes:2043, comments:[{u:'@jake.parker',t:'The fit is immaculate 👏'},{u:'@sophie.w',t:'She\'s a whole mood'}], liked:true, saved:false, hashtags:'#FrenchBulldog #PetLife'},
+  {id:'post10', petId:'p15', caption:"Daisy demolished her cardboard fort in record time. Rebuilding the empire tomorrow.", location:'Salt Lake City, UT', time:'3d ago', img:'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=900&q=80', likes:356, comments:[], liked:false, saved:false, hashtags:'#RabbitOwners #AdoptDontShop'},
+  {id:'post11', petId:'p8', caption:"Waffles has once again decided the keyboard is warmer than his actual bed.", location:'Portland, OR', time:'3d ago', img:'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=900&q=80', likes:731, comments:[{u:'@amelia.and.the.gang',t:'Every single time 😂'}], liked:false, saved:false, hashtags:'#CatLife #CutePets'},
+  {id:'post12', petId:'p16', caption:"Kiwi added a new word to her vocabulary today: 'snack time'. She will not stop saying it.", location:'Phoenix, AZ', time:'4d ago', img:'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=900&q=80', likes:298, comments:[], liked:false, saved:false, hashtags:'#BirdLovers #PetFriends'},
+  {id:'post13', petId:'p9', caption:"Peanut discovered the popcorn move and now does it every time dinner is announced.", location:'Portland, OR', time:'4d ago', img:'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=900&q=80', likes:504, comments:[{u:'@thegreenfamily',t:'The cutest thing I\'ve seen all week'}], liked:false, saved:false, hashtags:'#SmallPetOwners #CutePets'},
+  {id:'post14', petId:'p14', caption:"Finn's castle got a new tower this weekend and he has been doing victory laps ever since.", location:'Tampa, FL', time:'5d ago', img:'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=900&q=80', likes:189, comments:[], liked:false, saved:false, hashtags:'#AquariumLovers #PetLife'},
+];
+
+const hashtags = [
+  {tag:'#PetLife', posts:'128k'}, {tag:'#DogLovers', posts:'94k'}, {tag:'#CatLife', posts:'87k'},
+  {tag:'#PetFriends', posts:'52k'}, {tag:'#CutePets', posts:'201k'}, {tag:'#PuppyLove', posts:'76k'},
+  {tag:'#AdoptDontShop', posts:'41k'},
+];
+
+const communities = [
+  {id:'c1', icon:'🐶', name:'Dog Lovers', desc:'For everyone who thinks dogs are the best thing that ever happened to humanity.', members:'84,200', cover:'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=500&q=80'},
+  {id:'c2', icon:'🐱', name:'Cat Lovers', desc:'A cozy corner for cat parents, foster fails, and professional treat-dispensers.', members:'76,540', cover:'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&q=80'},
+  {id:'c3', icon:'🐰', name:'Rabbit Owners', desc:'Binkies, hay debates, and bunny-proofing tips for the dedicated rabbit parent.', members:'12,980', cover:'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=500&q=80'},
+  {id:'c4', icon:'🐦', name:'Bird Lovers', desc:'Feathers, whistles, and the eternal question: who taught you that word?', members:'9,410', cover:'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=500&q=80'},
+  {id:'c5', icon:'🐠', name:'Aquarium Lovers', desc:'Tank tours, planted setups, and betta fashion shows welcome.', members:'15,220', cover:'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?w=500&q=80'},
+  {id:'c6', icon:'🐹', name:'Small Pet Owners', desc:'Guinea pigs, hamsters, and gerbils — small bodies, huge personalities.', members:'7,860', cover:'https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=500&q=80'},
+  {id:'c7', icon:'🏕️', name:'Adventure Dogs', desc:'Trail dogs, beach dogs, and everything in between. Share your outdoor pup pics.', members:'23,150', cover:'https://images.unsplash.com/photo-1568572933382-74d440642117?w=500&q=80'},
+  {id:'c8', icon:'🎓', name:'New Pet Parents', desc:'Just brought home a new pet? Ask questions and swap first-week survival tips.', members:'18,730', cover:'https://images.unsplash.com/photo-1583512603806-077998240c7a?w=500&q=80'},
+  {id:'c9', icon:'🩺', name:'Senior Pet Care', desc:'Support and advice for anyone caring for an older dog, cat, or other beloved senior pet.', members:'11,040', cover:'https://images.unsplash.com/photo-1552053831-71594a27632d?w=500&q=80'},
+];
+
+const adoptions = [
+  {id:'a1', name:'Sunny', breed:'Mixed Terrier', age:'2 years', location:'Sacramento, CA', desc:'Sunny is a gentle, playful boy looking for a family with a fenced yard to zoom around in.', img:'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=500&q=80'},
+  {id:'a2', name:'Willow', breed:'Domestic Shorthair', age:'1 year', location:'Tucson, AZ', desc:'Willow is shy at first but turns into the biggest lap cat once she trusts you.', img:'https://images.unsplash.com/photo-1495360010541-f48722b34f7d?w=500&q=80'},
+  {id:'a3', name:'Rocky', breed:'Pit Mix', age:'4 years', location:'Nashville, TN', desc:'A big goofball who loves belly rubs and long naps in sunny spots.', img:'https://images.unsplash.com/photo-1552053831-71594a27632d?w=500&q=80'},
+  {id:'a4', name:'Ginger', breed:'Tabby', age:'6 months', location:'Raleigh, NC', desc:'A curious kitten who loves toys, boxes, and chasing her own tail.', img:'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=500&q=80'},
+  {id:'a5', name:'Buddy', breed:'Beagle Mix', age:'3 years', location:'Columbus, OH', desc:'Buddy is a nose-first explorer who needs a family that loves walks as much as he does.', img:'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=500&q=80'},
+  {id:'a6', name:'Hazel', breed:'Holland Lop', age:'1 year', location:'Boise, ID', desc:'Hazel is litter-trained and loves being let out to explore a bunny-proofed room.', img:'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=500&q=80'},
+  {id:'a7', name:'Duke', breed:'German Shepherd Mix', age:'5 years', location:'Kansas City, MO', desc:'Duke is a loyal, well-trained companion who would love a quiet home with a yard to patrol.', img:'https://images.unsplash.com/photo-1568572933382-74d440642117?w=500&q=80'},
+  {id:'a8', name:'Clementine', breed:'Calico', age:'2 years', location:'Richmond, VA', desc:'Clementine is playful and affectionate, and gets along great with other cats.', img:'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=500&q=80'},
+  {id:'a9', name:'Bandit', breed:'Border Collie Mix', age:'1 year', location:'Madison, WI', desc:'Bandit is whip-smart and needs an active family who can keep up with his energy.', img:'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=500&q=80'},
+];
+
+const conversations = [
+  {id:'m1', name:'Sophie & Luna', online:true, msgs:[{from:'them',t:'Luna says hi to Max! 🐱🐶'},{from:'me',t:'Max is already planning a playdate 😂'},{from:'them',t:'Perfect, this weekend?'}]},
+  {id:'m2', name:'Jake & Max', online:true, msgs:[{from:'them',t:'Beach trip was amazing, we should do a group one!'},{from:'me',t:'Yes! Let\'s bring Milo too'}]},
+  {id:'m3', name:'The Green Family', online:false, msgs:[{from:'them',t:'Coco says thank you for the tips on hay 🐰'},{from:'me',t:'Anytime! She\'s adorable'}]},
+  {id:'m4', name:'Riley & Milo', online:false, msgs:[{from:'them',t:'Corgi meetup this Saturday?'},{from:'me',t:'Count us in!'}]},
+];
+
+const notifications = [
+  {ic:'❤️', text:'<b>Sophie W.</b> liked your post of Max at the beach', time:'12m ago', unread:true},
+  {ic:'💬', text:'<b>Jake P.</b> commented on Luna\'s nap photo', time:'40m ago', unread:true},
+  {ic:'➕', text:'<b>Riley K.</b> started following Biscuit', time:'2h ago', unread:true},
+  {ic:'🐾', text:'<b>Ana T.</b> mentioned Waffles in a post', time:'5h ago', unread:true},
+  {ic:'👥', text:'New activity in <b>Dog Lovers</b> community', time:'1d ago', unread:true},
+  {ic:'❤️', text:'<b>Riley K.</b> liked Milo\'s stair-climbing video', time:'2d ago', unread:false},
+];
+
+/* ======================================================================
+   STATE
+====================================================================== */
+let joinedCommunities = new Set();
+let followedPets = new Set(['p1','p2']);
+let activeConv = conversations[0].id;
+let uploadedPetPhoto = '';
+let uploadedPostMedia = '';
+let selectedPrivacy = 'Public';
+
+/* ======================================================================
+   HELPERS
+====================================================================== */
+function toast(msg){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className='toast'; el.textContent = msg;
+  wrap.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),300); }, 2400);
+}
+function petById(id){ return pets.find(p=>p.id===id); }
+function openOverlay(id){ document.getElementById(id).classList.add('open'); }
+function closeOverlay(id){ document.getElementById(id).classList.remove('open'); }
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target = document.getElementById('page-'+name);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.navlink').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
+  document.querySelectorAll('.bottom-nav button[data-page]').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
+  window.scrollTo({top:0, behavior:'smooth'});
+  closeDrawer();
+}
+
+/* ======================================================================
+   RENDER: STORIES
+====================================================================== */
+function renderStories(){
+  const row = document.getElementById('storiesRow');
+  let html = `<button class="story add-story" id="addStoryBtn"><div class="ring">➕</div><span>Your story</span></button>`;
+  pets.slice(0,8).forEach((p,i)=>{
+    html += `<button class="story ${i>4?'seen':''}" data-pet="${p.id}">
+      <div class="ring"><img src="${p.pic}" alt="${p.name}"></div>
+      <span>${p.name}</span>
+    </button>`;
+  });
+  row.innerHTML = html;
+  row.querySelectorAll('.story[data-pet]').forEach(el=>{
+    el.addEventListener('click', ()=>openStory(el.dataset.pet));
+  });
+  document.getElementById('addStoryBtn').addEventListener('click', ()=>toast('Story upload coming soon 📸'));
+}
+
+function openStory(petId){
+  const p = petById(petId);
+  const viewer = document.getElementById('storyViewer');
+  document.getElementById('svAvatar').src = p.pic;
+  document.getElementById('svName').textContent = p.name;
+  document.getElementById('svContent').textContent = `"${p.bio}"`;
+  document.getElementById('svFill').style.animation='none';
+  void document.getElementById('svFill').offsetWidth;
+  document.getElementById('svFill').style.animation='svfill 4s linear forwards';
+  viewer.classList.add('open');
+}
+document.getElementById('svClose').addEventListener('click', ()=>document.getElementById('storyViewer').classList.remove('open'));
+document.getElementById('svPrev').addEventListener('click', ()=>{
+  const idx = pets.findIndex(p=>p.name===document.getElementById('svName').textContent);
+  openStory(pets[(idx-1+pets.length)%pets.length].id);
+});
+document.getElementById('svNext').addEventListener('click', ()=>{
+  const idx = pets.findIndex(p=>p.name===document.getElementById('svName').textContent);
+  openStory(pets[(idx+1)%pets.length].id);
+});
+
+/* ======================================================================
+   RENDER: FEED
+====================================================================== */
+function postCardHTML(post){
+  const pet = petById(post.petId);
+  return `
+  <article class="card post" data-post="${post.id}">
+    <div class="post-head">
+      <img class="avatar" src="${pet.pic}" width="42" height="42" style="border-radius:50%; object-fit:cover;" alt="">
+      <div class="who">
+        <div class="petname">${pet.name} <span style="font-weight:500;color:var(--charcoal-soft);font-size:12.5px;">${pet.owner}</span></div>
+        <div class="meta">${post.time}</div>
+      </div>
+      <button class="more">⋯</button>
+    </div>
+    <img class="post-media" src="${post.img}" alt="${pet.name} post">
+    <div class="post-body">
+      <div class="post-caption"><b>${pet.name}</b> ${post.caption}</div>
+      <div style="margin-top:6px;">${post.hashtags.split(' ').map(h=>`<span class="tag">${h}</span>`).join('')}</div>
+      <div class="post-location">📍 ${post.location}</div>
+    </div>
+    <div class="post-actions">
+      <button class="pill-btn like-btn ${post.liked?'liked':''}">❤️ <span class="like-count">${post.likes}</span></button>
+      <button class="pill-btn comment-toggle">💬 <span>${post.comments.length}</span></button>
+      <button class="pill-btn share-btn">🔄 Share</button>
+      <button class="pill-btn save-btn ${post.saved?'saved':''}">🔖 ${post.saved?'Saved':'Save'}</button>
+    </div>
+    <div class="comment-box" id="comments-${post.id}">
+      ${post.comments.map(c=>`<div class="comment"><b>${c.u}</b> ${c.t}</div>`).join('') || '<div style="font-size:13px;color:var(--charcoal-soft);">No comments yet — be the first 🐾</div>'}
+      <div class="comment-input">
+        <input type="text" placeholder="Add a comment…">
+        <button class="send-comment">Post</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function renderFeed(){
+  const list = document.getElementById('feedList');
+  list.innerHTML = posts.map(postCardHTML).join('');
+  wireFeedEvents(list);
+}
+
+function wireFeedEvents(scope){
+  scope.querySelectorAll('.like-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.closest('[data-post]').dataset.post;
+      const post = posts.find(p=>p.id===id);
+      post.liked = !post.liked;
+      post.likes += post.liked ? 1 : -1;
+      btn.classList.toggle('liked', post.liked);
+      btn.querySelector('.like-count').textContent = post.likes;
+      if(post.liked) toast('You liked this post ❤️');
+    });
+  });
+  scope.querySelectorAll('.save-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.closest('[data-post]').dataset.post;
+      const post = posts.find(p=>p.id===id);
+      post.saved = !post.saved;
+      btn.classList.toggle('saved', post.saved);
+      btn.innerHTML = `🔖 ${post.saved?'Saved':'Save'}`;
+      toast(post.saved ? 'Saved to your collection 🔖' : 'Removed from saved');
+      if(document.getElementById('page-profile').classList.contains('active')) renderProfilePage();
+    });
+  });
+  scope.querySelectorAll('.share-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>toast('Link copied — share the love 🔄'));
+  });
+  scope.querySelectorAll('.comment-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.closest('[data-post]').dataset.post;
+      document.getElementById('comments-'+id).classList.toggle('open');
+    });
+  });
+  scope.querySelectorAll('.send-comment').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const wrap = btn.closest('.comment-box');
+      const input = wrap.querySelector('input');
+      if(!input.value.trim()) return;
+      const id = btn.closest('[data-post]')?.dataset.post || wrap.id.replace('comments-','');
+      const post = posts.find(p=>p.id===id);
+      post.comments.push({u:'@amelia.and.the.gang', t:input.value.trim()});
+      input.value='';
+      renderFeed();
+      toast('Comment posted 💬');
+    });
+  });
+}
+
+/* ======================================================================
+   RENDER: SIDEBAR WIDGETS
+====================================================================== */
+function renderHashtagWidget(){
+  document.getElementById('hashtagWidget').innerHTML = hashtags.map(h=>
+    `<div class="hashtag-row"><b>${h.tag}</b><span>${h.posts} posts</span></div>`).join('');
+}
+function renderSuggestWidget(){
+  const suggestions = pets.filter(p=>!followedPets.has(p.id)).slice(0,4);
+  document.getElementById('suggestWidget').innerHTML = suggestions.map(p=>`
+    <div class="suggest-row">
+      <img class="avatar" src="${p.pic}" width="38" height="38" style="border-radius:50%; object-fit:cover;">
+      <div class="who"><b>${p.name}</b><span>${p.breed}</span></div>
+      <button class="mini-follow" data-pet="${p.id}">Follow</button>
+    </div>`).join('');
+  document.getElementById('suggestWidget').querySelectorAll('.mini-follow').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      followedPets.add(btn.dataset.pet);
+      toast(`You're now following ${petById(btn.dataset.pet).name} 🐾`);
+      renderSuggestWidget();
+    });
+  });
+}
+function renderAdoptWidget(){
+  document.getElementById('adoptWidget').innerHTML = adoptions.slice(0,2).map(a=>`
+    <div class="suggest-row">
+      <img src="${a.img}" width="46" height="46" style="border-radius:12px; object-fit:cover;">
+      <div class="who"><b>${a.name}</b><span>${a.breed} · ${a.location}</span></div>
+    </div>`).join('');
+}
+
+/* ======================================================================
+   RENDER: EXPLORE
+====================================================================== */
+function tileHTML(item, type){
+  if(type==='pet'){
+    return `<div class="tile" data-open-pet="${item.id}">
+      <img src="${item.pic}" alt="${item.name}">
+      <div class="tile-body"><h4>${item.name}</h4><p>${item.breed} · ${item.followers.toLocaleString()} followers</p></div>
+    </div>`;
+  }
+  if(type==='post'){
+    const pet = petById(item.petId);
+    return `<div class="tile" data-open-post="${item.id}">
+      <img src="${item.img}" alt="">
+      <div class="tile-body"><h4>${pet.name} · ❤️ ${item.likes}</h4><p>${item.caption.slice(0,50)}...</p></div>
+    </div>`;
+  }
+  if(type==='comm'){
+    return `<div class="tile comm-card">
+      <div class="comm-cover" style="background-image:url('${item.cover}')"></div>
+      <div class="comm-body">
+        <div class="icon">${item.icon}</div>
+        <h4>${item.name}</h4><p>${item.desc}</p>
+        <div class="count">${item.members} members</div>
+        <button class="join-btn ${joinedCommunities.has(item.id)?'joined':''}" data-join="${item.id}">${joinedCommunities.has(item.id)?'✓ Joined':'Join'}</button>
+      </div>
+    </div>`;
+  }
+}
+function renderExplore(){
+  document.getElementById('exploreTrendingPets').innerHTML = [...pets].sort((a,b)=>b.followers-a.followers).slice(0,3).map(p=>tileHTML(p,'pet')).join('');
+  document.getElementById('explorePopularPosts').innerHTML = [...posts].sort((a,b)=>b.likes-a.likes).slice(0,3).map(p=>tileHTML(p,'post')).join('');
+  document.getElementById('exploreNewPets').innerHTML = pets.slice(-3).map(p=>tileHTML(p,'pet')).join('');
+  document.getElementById('exploreHashtags').innerHTML = hashtags.map(h=>`<span class="tag" style="font-size:13px; padding:8px 14px;">${h.tag} · ${h.posts}</span>`).join('');
+  document.getElementById('explorePopularComm').innerHTML = communities.slice(0,3).map(c=>tileHTML(c,'comm')).join('');
+  wireTileEvents(document.getElementById('page-explore'));
+}
+function wireTileEvents(scope){
+  scope.querySelectorAll('[data-open-pet]').forEach(el=>el.addEventListener('click',()=>openPetProfile(el.dataset.openPet)));
+  scope.querySelectorAll('[data-join]').forEach(el=>el.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    const id = el.dataset.join;
+    if(joinedCommunities.has(id)){ joinedCommunities.delete(id); } else { joinedCommunities.add(id); toast('Joined the community 👥'); }
+    renderExplore(); renderCommunities();
+  }));
+}
+
+/* ======================================================================
+   RENDER: COMMUNITIES PAGE
+====================================================================== */
+function renderCommunities(){
+  document.getElementById('communitiesGrid').innerHTML = communities.map(c=>tileHTML(c,'comm')).join('');
+  wireTileEvents(document.getElementById('page-communities'));
+}
+
+/* ======================================================================
+   RENDER: ADOPTION
+====================================================================== */
+function adoptCardHTML(a){
+  return `<div class="tile adopt-card" style="position:relative;">
+    <span class="badge-adopt">Available</span>
+    <img src="${a.img}" alt="${a.name}">
+    <div class="tile-body">
+      <h4>${a.name} · ${a.age}</h4>
+      <p>${a.breed} · 📍 ${a.location}</p>
+      <p style="margin-top:6px;">${a.desc}</p>
+      <button class="learn-btn" data-learn="${a.id}">Learn more</button>
+    </div>
+  </div>`;
+}
+function renderAdoption(){
+  document.getElementById('adoptionGrid').innerHTML = adoptions.map(adoptCardHTML).join('');
+  document.getElementById('adoptionGrid').querySelectorAll('[data-learn]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const a = adoptions.find(x=>x.id===btn.dataset.learn);
+      toast(`Reach out about ${a.name} via Messages 💌`);
+    });
+  });
+}
+
+/* ======================================================================
+   RENDER: MESSAGES
+====================================================================== */
+function renderConvList(){
+  document.getElementById('convList').innerHTML = `<h3>Messages</h3>` + conversations.map(c=>`
+    <div class="conv ${c.id===activeConv?'active':''}" data-conv="${c.id}">
+      <img class="avatar" src="https://i.pravatar.cc/60?u=${c.id}" width="42" height="42" style="border-radius:50%;">
+      <div class="who"><b>${c.name}</b><span>${c.msgs[c.msgs.length-1].t}</span></div>
+      ${c.online?'<div class="online-dot"></div>':''}
+    </div>`).join('');
+  document.getElementById('convList').querySelectorAll('[data-conv]').forEach(el=>{
+    el.addEventListener('click', ()=>{ activeConv = el.dataset.conv; renderConvList(); renderChat(); });
+  });
+}
+function renderChat(){
+  const c = conversations.find(x=>x.id===activeConv);
+  document.getElementById('chatHead').innerHTML = `${c.name} ${c.online?'<span>● Online</span>':'<span style="color:var(--charcoal-soft);">Offline</span>'}`;
+  document.getElementById('chatBody').innerHTML = c.msgs.map(m=>`<div class="bubble ${m.from==='me'?'me':'them'}">${m.t}</div>`).join('');
+  document.getElementById('chatBody').scrollTop = 999999;
+}
+document.getElementById('chatSendBtn').addEventListener('click', sendChat);
+document.getElementById('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendChat(); });
+function sendChat(){
+  const input = document.getElementById('chatInput');
+  if(!input.value.trim()) return;
+  const c = conversations.find(x=>x.id===activeConv);
+  c.msgs.push({from:'me', t: input.value.trim()});
+  input.value='';
+  renderChat(); renderConvList();
+  setTimeout(()=>{ c.msgs.push({from:'them', t:'🐾 Woof! (auto-reply)'}); renderChat(); renderConvList(); }, 900);
+}
+
+/* ======================================================================
+   RENDER: NOTIFICATIONS
+====================================================================== */
+function notifItemHTML(n){
+  return `<div class="notif-item ${n.unread?'unread':''}"><div class="ic-wrap">${n.ic}</div><div><p>${n.text}</p><span>${n.time}</span></div></div>`;
+}
+function renderNotifications(){
+  document.getElementById('notifList').innerHTML = notifications.slice(0,5).map(notifItemHTML).join('');
+  document.getElementById('notifPageList').innerHTML = notifications.map(notifItemHTML).join('');
+}
+
+/* ======================================================================
+   RENDER: PROFILE (user)
+====================================================================== */
+function renderProfilePage(){
+  const myPets = pets.filter(p=>p.owner==='@amelia.and.the.gang');
+  document.getElementById('profilePostsGrid').innerHTML = posts.filter(p=>myPets.some(mp=>mp.id===p.petId)).map(p=>tileHTML(p,'post')).join('') || `<div class="empty"><div class="em-ic">📷</div>No posts yet</div>`;
+  document.getElementById('profilePetsGrid').innerHTML = myPets.map(p=>tileHTML(p,'pet')).join('');
+  const saved = posts.filter(p=>p.saved);
+  document.getElementById('profileSavedGrid').innerHTML = saved.length ? saved.map(p=>tileHTML(p,'post')).join('') : `<div class="empty"><div class="em-ic">🔖</div>Nothing saved yet — tap the save icon on a post to keep it here.</div>`;
+  const joined = communities.filter(c=>joinedCommunities.has(c.id));
+  document.getElementById('profileCommGrid').innerHTML = joined.length ? joined.map(c=>tileHTML(c,'comm')).join('') : `<div class="empty"><div class="em-ic">👥</div>You haven't joined any communities yet.</div>`;
+  wireTileEvents(document.getElementById('page-profile'));
+}
+document.querySelectorAll('#profileTabs .tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('#profileTabs .tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
+    document.getElementById('tab-'+tab.dataset.tab).style.display='block';
+  });
+});
+
+/* ======================================================================
+   RENDER: PET PROFILE
+====================================================================== */
+function openPetProfile(id){
+  const p = petById(id);
+  document.getElementById('petProfilePic').src = p.pic;
+  document.getElementById('petProfileName').textContent = p.name;
+  document.getElementById('petProfileSub').textContent = `${p.breed} · ${p.gender} · ${p.owner} · 📍 ${p.location}`;
+  document.getElementById('petStatRow').innerHTML = `
+    <div><b>${p.posts}</b>Posts</div><div><b>${p.followers.toLocaleString()}</b>Followers</div>
+    <div><b>${p.following}</b>Following</div><div><b>${p.age}</b>Age</div>`;
+  document.getElementById('petBioBlock').innerHTML = `
+    <div class="about-line"><b>Bio</b>${p.bio}</div>
+    <div class="about-line"><b>Species</b>${p.species}</div>
+    <div class="about-line"><b>Birthday</b>${p.birthday}</div>
+    <div class="about-line"><b>Favorite activities</b>${p.activities}</div>`;
+  const relatedPosts = posts.filter(post=>post.petId===p.id);
+  document.getElementById('petPhotoGrid').innerHTML = relatedPosts.length
+    ? relatedPosts.map(post=>`<div class="tile" data-open-post="${post.id}"><img src="${post.img}"><div class="tile-body"><p>❤️ ${post.likes} likes</p></div></div>`).join('')
+    : `<div class="empty"><div class="em-ic">🖼️</div>No posts from ${p.name} yet.</div>`;
+  const followBtn = document.getElementById('petFollowBtn');
+  const isFollowing = followedPets.has(p.id);
+  followBtn.textContent = isFollowing ? 'Following' : 'Follow';
+  followBtn.classList.toggle('following', isFollowing);
+  followBtn.onclick = ()=>{
+    if(followedPets.has(p.id)){ followedPets.delete(p.id); } else { followedPets.add(p.id); toast(`You're following ${p.name} now 🐾`); }
+    openPetProfile(p.id); renderSuggestWidget();
+  };
+  document.getElementById('petShareBtn').onclick = ()=>toast(`${p.name}'s profile link copied 🔗`);
+  showPage('pet');
+}
+
+/* ======================================================================
+   SEARCH
+====================================================================== */
+function doSearch(query){
+  query = query.trim().toLowerCase();
+  if(!query){ showPage('home'); return; }
+  const matchedPets = pets.filter(p=>p.name.toLowerCase().includes(query)||p.breed.toLowerCase().includes(query)||p.owner.toLowerCase().includes(query));
+  const matchedComm = communities.filter(c=>c.name.toLowerCase().includes(query));
+  const matchedTags = hashtags.filter(h=>h.tag.toLowerCase().includes(query));
+  document.getElementById('searchTitle').textContent = `Results for "${query}"`;
+  let html = '';
+  if(matchedPets.length){
+    html += `<h3 style="margin-bottom:10px;">Pets & users</h3><div class="grid grid-3" style="margin-bottom:26px;">${matchedPets.map(p=>tileHTML(p,'pet')).join('')}</div>`;
+  }
+  if(matchedComm.length){
+    html += `<h3 style="margin-bottom:10px;">Communities</h3><div class="grid grid-3" style="margin-bottom:26px;">${matchedComm.map(c=>tileHTML(c,'comm')).join('')}</div>`;
+  }
+  if(matchedTags.length){
+    html += `<h3 style="margin-bottom:10px;">Hashtags</h3><div style="display:flex; flex-wrap:wrap; gap:8px;">${matchedTags.map(h=>`<span class="tag" style="font-size:13px; padding:8px 14px;">${h.tag} · ${h.posts}</span>`).join('')}</div>`;
+  }
+  if(!html){ html = `<div class="empty"><div class="em-ic">🔍</div>No results for "${query}". Try a different name, breed, or hashtag.</div>`; }
+  document.getElementById('searchResults').innerHTML = html;
+  wireTileEvents(document.getElementById('page-search'));
+  showPage('search');
+}
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>doSearch(e.target.value), 250);
+});
+
+/* ======================================================================
+   NAVIGATION WIRING
+====================================================================== */
+document.querySelectorAll('[data-page]').forEach(el=>{
+  el.addEventListener('click', (e)=>{
+    e.preventDefault();
+    showPage(el.dataset.page);
+  });
+});
+document.getElementById('bottomCreate').addEventListener('click', ()=>openOverlay('createPostOverlay'));
+
+/* mobile drawer */
+function openDrawer(){ document.getElementById('sidebarMobile').classList.add('open'); document.getElementById('drawerOverlay').classList.add('open'); }
+function closeDrawer(){ document.getElementById('sidebarMobile').classList.remove('open'); document.getElementById('drawerOverlay').classList.remove('open'); }
+document.getElementById('hamburgerBtn').addEventListener('click', openDrawer);
+document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+
+/* notifications dropdown */
+document.getElementById('notifBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  document.getElementById('notifPanel').classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  const panel = document.getElementById('notifPanel');
+  if(panel.classList.contains('open') && !panel.contains(e.target) && e.target.id!=='notifBtn'){
+    panel.classList.remove('open');
+  }
+});
+
+/* theme toggle */
+document.getElementById('themeToggle').addEventListener('click', ()=>{
+  const body = document.body;
+  const isDark = body.getAttribute('data-theme')==='dark';
+  body.setAttribute('data-theme', isDark ? 'light':'dark');
+  document.getElementById('themeToggle').textContent = isDark ? '🌙' : '☀️';
+});
+
+/* modal open/close wiring */
+['addPetBtnSidebar','addPetBtnMobile','addPetBtnTop'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', ()=>{ openOverlay('addPetOverlay'); closeDrawer(); });
+});
+document.getElementById('createPostBtnTop').addEventListener('click', ()=>openOverlay('createPostOverlay'));
+document.querySelectorAll('[data-close]').forEach(btn=>{
+  btn.addEventListener('click', ()=>closeOverlay(btn.dataset.close));
+});
+document.querySelectorAll('.overlay').forEach(ov=>{
+  ov.addEventListener('click', (e)=>{ if(e.target===ov) ov.classList.remove('open'); });
+});
+
+/* ======================================================================
+   ADD PET FORM
+====================================================================== */
+document.getElementById('petPhotoInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    uploadedPetPhoto = reader.result;
+    document.getElementById('petPhotoBox').innerHTML = `<img src="${uploadedPetPhoto}"><input type="file" accept="image/*" id="petPhotoInput" style="display:none;">`;
+    document.getElementById('petPhotoInput').addEventListener('change', arguments.callee);
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('addPetForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const form = e.target;
+  let valid = true;
+  form.querySelectorAll('[data-req]').forEach(f=>{
+    const input = f.querySelector('input,select');
+    if(!input.value.trim()){ f.classList.add('error'); valid = false; } else { f.classList.remove('error'); }
+  });
+  if(!valid){ toast('Please fill in the required fields'); return; }
+  const data = new FormData(form);
+  const newPet = {
+    id:'p'+(pets.length+1), name:data.get('name'), species:data.get('species'), breed:data.get('breed')||'Mixed',
+    age:data.get('age'), gender:data.get('gender')||'Unknown', birthday:data.get('birthday')||'—',
+    location:data.get('location')||'Unknown', bio:data.get('bio')||'New to Furfeed!', activities:data.get('activities')||'—',
+    owner:'@amelia.and.the.gang', pic: uploadedPetPhoto || 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=400&q=80',
+    followers:0, following:0, posts:0
+  };
+  pets.push(newPet);
+  toast(`${newPet.name} has joined Furfeed! 🎉`);
+  form.reset();
+  document.getElementById('petPhotoBox').innerHTML = `<span id="petPhotoText">Click to upload a photo of your pet 📷</span><input type="file" accept="image/*" id="petPhotoInput">`;
+  uploadedPetPhoto = '';
+  closeOverlay('addPetOverlay');
+  renderProfilePage(); renderSuggestWidget(); populateTagPetSelect();
+});
+
+/* ======================================================================
+   CREATE POST FORM
+====================================================================== */
+document.getElementById('postMediaInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    uploadedPostMedia = reader.result;
+    document.getElementById('postMediaBox').innerHTML = `<img src="${uploadedPostMedia}"><input type="file" accept="image/*,video/*" id="postMediaInput" style="display:none;">`;
+  };
+  reader.readAsDataURL(file);
+});
+function populateTagPetSelect(){
+  const myPets = pets.filter(p=>p.owner==='@amelia.and.the.gang');
+  document.getElementById('tagPetSelect').innerHTML = `<option value="">None</option>` + myPets.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+}
+document.getElementById('privacyOpts').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.priv-chip');
+  if(!chip) return;
+  document.querySelectorAll('.priv-chip').forEach(c=>c.classList.remove('selected'));
+  chip.classList.add('selected');
+  selectedPrivacy = chip.dataset.val;
+});
+document.getElementById('createPostForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const form = e.target;
+  let valid = true;
+  form.querySelectorAll('[data-req]').forEach(f=>{
+    const input = f.querySelector('textarea,input');
+    if(!input.value.trim()){ f.classList.add('error'); valid=false; } else { f.classList.remove('error'); }
+  });
+  if(!valid){ toast('Please write a caption first'); return; }
+  const data = new FormData(form);
+  const tagPetId = data.get('tagpet') || (pets.find(p=>p.owner==='@amelia.and.the.gang')||pets[0]).id;
+  const newPost = {
+    id:'post'+(posts.length+1), petId: tagPetId,
+    caption: data.get('caption'), location: data.get('location')||'Unknown',
+    time:'Just now', img: uploadedPostMedia || 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=900&q=80',
+    likes:0, comments:[], liked:false, saved:false,
+    hashtags: data.get('hashtags') || '#PetLife'
+  };
+  posts.unshift(newPost);
+  toast('Your post is live! 🎉');
+  form.reset();
+  document.getElementById('postMediaBox').innerHTML = `<span id="postMediaText">Click to upload a photo or video 📷</span><input type="file" accept="image/*,video/*" id="postMediaInput">`;
+  uploadedPostMedia = '';
+  document.querySelectorAll('.priv-chip').forEach(c=>c.classList.remove('selected'));
+  document.querySelector('.priv-chip[data-val="Public"]').classList.add('selected');
+  closeOverlay('createPostOverlay');
+  renderFeed();
+  showPage('home');
+});
+
+/* ======================================================================
+   INITIAL RENDER
+====================================================================== */
+function initApp(){
+  renderStories();
+  renderFeed();
+  renderHashtagWidget();
+  renderSuggestWidget();
+  renderAdoptWidget();
+  renderExplore();
+  renderCommunities();
+  renderAdoption();
+  renderConvList();
+  renderChat();
+  renderNotifications();
+  renderProfilePage();
+  populateTagPetSelect();
+}
+initApp();
+</script>
+</body>
+</html>
